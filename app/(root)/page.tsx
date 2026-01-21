@@ -3,19 +3,29 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { signOut } from "@/lib/auth-actions/auth.actions"
 import { useRouter } from "next/navigation";
+import { useAuthSession } from "@/contexts/AuthContext";
+import { signOut } from "@/lib/auth-actions/auth.actions"
 
 export default function IntroPage() {
   const router = useRouter();
+  const { data: session, isPending } = useAuthSession();
+
+  if (isPending) return <div>Loading...</div>;
+
   const user = {
-    name: 'Shivam',
-    codeforcesHandle: 'ShivamKapoor23',
+    name: session?.user.name || "User",
+    email: session?.user.email || "No email",
+    codeforcesHandle: 'Not Yet Verified',
   };
 
+  console.log("client side user: ", user);
+  console.log("session established: ", session);
+
   const handleStartDuel = () => console.log('Starting duel...');
+  
   const handleSignOut = async () => {
-    await signOut();
+    await signOut(); 
     router.push("/sign-in");
   };
 
@@ -26,7 +36,7 @@ export default function IntroPage() {
           <Avatar className="w-16 h-16 mx-auto border-2 border-yellow-400">
             <AvatarImage src="/api/placeholder/64/64" />
             <AvatarFallback className="bg-yellow-500 text-white font-bold text-lg">
-              {user.name[0]}
+              {user.name[0]?.toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <CardTitle className="text-xl font-bold bg-linear-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
@@ -41,7 +51,12 @@ export default function IntroPage() {
           <div className="space-y-3 text-white">
             <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
               <span className="font-semibold">{user.name}</span>
-              <span className="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded-full">Not Verified</span>
+            </div>
+            <div className="flex items-center gap-2 p-3 bg-white/5 rounded-lg">
+              <span className="text-xs w-20">Email:</span>
+              <span className="font-mono text-sm text-white/90 truncate max-w-60">
+                {user.email}
+              </span>
             </div>
             <div className="flex items-center gap-2 p-3 bg-white/5 rounded-lg">
               <span className="text-xs w-20">Codeforces:</span>
